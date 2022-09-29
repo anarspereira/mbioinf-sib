@@ -4,100 +4,114 @@ import pandas as pd
 
 class Dataset:
 
-    def __init__(self, X: object, y: object, features: list, label: str) -> object:
+    def __init__(self, X: np.ndarray, y: np.ndarray, features: list, label: str):
+        #TODO: não está a assumir np.ndarray, tentar resolver
         """
         Construtor.
-        :param X: Numpy np array - array com valores
-        :param y: Numpy ud array - array com bool se é supervisionado ou não (True ou False)
-        :param features: Lista de strings com features
-        :param label: String
+
+        :param X: Array com valores das features (variáveis independentes) - np.ndarray
+        :param y: Array com bool se a variável dependente é supervisionada ou não (True ou False) (np.udarray?)
+        :param features: Lista de strings com o nome das features
+        :param label: String com nome do vetor da variável dependente
         """
         self.X = X
         self.y = y
         self.features = features
         self.label = label
 
-    def shape (self):
+    def shape(self) -> tuple:
         """
         Dá a forma do dataset.
+
         :return: Tuplo com nº de exemplos e nº de colunas.
         """
         return self.X.shape
 
-    def has_label (self):
+    def has_label(self) -> bool:
         """
         Verifica se o dataset é supervisionado (tem label (vetor y)) ou não supervisionado (não tem label).
-        :return: True se tem label; False se não tem label.
+
+        :return: Booleano: true se tem label; false se não tem label.
         """
         if self.y is not None:
             return True
         else:
             return False
 
-    def get_classes (self):
+    def get_classes(self) -> list:
         """
         Classes do dataset.
-        :return: Valores únicos.
+
+        :return: Lista com os valores únicos.
         """
         if self.y is None:
-            return
+            return # dataset não supervisionado (sem label)
+        else:
+            return np.unique(self.y)
 
-        return np.unique(self.y)
-
-    def get_mean (self):
+    def get_mean(self) -> list:
         """
         Calcula a média.
-        :return: Média.
-        """
-        return np.nanmean(self.X, axis = 0) # axis 0: colunas, axis 1: exemplos
 
-    def get_variance (self):
+        :return: Lista com as médias das features.
+        """
+        return np.nanmean(self.X, axis=0)  # axis 0: colunas, axis 1: exemplos
+
+    def get_variance(self) -> list:
         """
         Calcula a variância.
-        :return: Variância.
-        """
-        return np.nanvar(self.X, axis = 0)
 
-    def get_median (self):
+        :return: Lista com as variâncias das features.
+        """
+        return np.nanvar(self.X, axis=0)
+
+    def get_median(self) -> list:
         """
         Calcula a mediana.
-        :return: Mediana.
-        """
-        return np.nanmedian(self.X, axis = 0)
 
-    def get_min (self):
+        :return: Lista com as medianas das features.
+        """
+        return np.nanmedian(self.X, axis=0)
+
+    def get_min(self) -> list:
         """
         Calcula o mínimo.
-        :return: Mínimo.
-        """
-        return np.nanmin(self.X, axis = 0)
 
-    def get_max (self):
+        :return: Lista com os valores mínimos das features.
+        """
+        return np.nanmin(self.X, axis=0)
+
+    def get_max(self) -> list:
         """
         Calcula o máximo.
-        :return: Máximo.
-        """
-        return np.nanmax(self.X, axis = 0)
 
-    def summary (self):
+        :return: Lista com os valores máximos das features.
         """
-        Cria um pandas dataframe com média, mediana, mínimo e máximo.
+        return np.nanmax(self.X, axis=0)
+
+    def summary(self) -> pd.DataFrame:
+        #TODO: não está a assumir pd.Dataframe, tentar resolver
+        """
+        Cria pandas dataframe com média, mediana, variância, mínimo e máximo das features.
+
         :return: Pandas dataframe.
         """
         return pd.DataFrame(
             {'mean': self.get_mean(),
              'median': self.get_median(),
+             'variance': self.get_variance(),
              'min': self.get_min(),
              'max': self.get_max()}
         )
 
+
 if __name__ == '__main__':
-    x = np.array([[1,2,3], [1,2,3]])
-    y = np.array([1,2])
+    x = np.array([[1, 2, 3], [1, 2, 3]])
+    y = np.array([1, 2])
     features = ['A', 'B', 'C']
     label = 'y'
-    dataset = Dataset(X = x, y = y, features = features, label = label)
-    dataset_naosuperv = Dataset(X = x, y = None, features = features, label = label)
+    dataset = Dataset(X=x, y=y, features=features, label=label)
+    dataset_naosuperv = Dataset(X=x, y=None, features=features, label=label)
     print(dataset.shape())
     print(dataset.has_label())
     print(dataset_naosuperv.has_label())
