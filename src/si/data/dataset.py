@@ -39,13 +39,15 @@ class Dataset:
             return False
 
     def get_classes(self) -> list:
+        #TODO: descobrir se devo dar raise de uma exception ou typeerror
+        #TODO: descobrir se é possível dar raise sem parar o programa
         """
         Classes do dataset.
 
         :return: Lista com os valores únicos.
         """
         if self.y is None:
-            return # dataset não supervisionado (sem label)
+            raise Exception('Dataset não supervisionado (sem label).')
         else:
             return np.unique(self.y)
 
