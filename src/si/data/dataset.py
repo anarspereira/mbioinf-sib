@@ -92,7 +92,6 @@ class Dataset:
         return np.nanmax(self.X, axis=0)
 
     def summary(self) -> pd.DataFrame:
-        #TODO: não está a assumir pd.Dataframe, tentar resolver
         """
         Cria pandas dataframe com média, mediana, variância, mínimo e máximo das features.
 
@@ -105,6 +104,26 @@ class Dataset:
              'min': self.get_min(),
              'max': self.get_max()}
         )
+
+    def remove_null(self) -> pd.DataFrame:
+        """
+        Remove os valores nulos.
+
+        :return: Pandas dataframe.
+        """
+        if self.X is None:
+            return pd.DataFrame(self.X).dropna(axis=0)
+
+    def replace_null(self, value) -> pd.DataFrame:
+        """
+        Substitui os valores nulos.
+
+        :param value: Valor que vai substituir o valor nulo.
+
+        :return: Pandas dataframe.
+        """
+        if self.X is None:
+            return pd.DataFrame(self.X).fillna(value)
 
 
 if __name__ == '__main__':
@@ -125,3 +144,4 @@ if __name__ == '__main__':
     print(dataset.get_min())
     print(dataset.get_max())
     print(dataset.summary())
+    #TODO: testes
