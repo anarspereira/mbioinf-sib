@@ -2,9 +2,6 @@ import pandas as pd
 from si.data.dataset import Dataset
 
 def read_csv(filename: str, sep: str = ",", features: bool = False, label: bool = False) -> pd.DataFrame:
-    #TODO: não está a assumir pd.Dataframe
-    #TODO: completar documentação
-    #TODO: resolver método
 
     # sep: str, features: bool, label: bool
 
@@ -18,7 +15,7 @@ def read_csv(filename: str, sep: str = ",", features: bool = False, label: bool 
 
     :return: Pandas dataframe do csv
     """
-    dataframe = pd.read_csv(filename, delimiter=sep)
+    data = pd.read_csv(filename, delimiter=sep)
     if features and label:  # se temos as features e labels
         features = data.colums[:-1]
         x = data.iloc[1:, 0:, -1].to_numpy()  # queremos começar na primeira linha #passa para numpy

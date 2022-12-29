@@ -31,6 +31,7 @@ def write_data_file (filename: str, sep: str = ",", label: bool = False) -> obje
 
     :return: Objeto com dataset.
     """
+    global data
     if label is True:  # se temos label definida
         data = np.hstack(dataset.x, dataset.y)  # reune os array na horizontal
         data = np.savetxt(filename, delimiter=sep, data)  # guarda o array num ficheiro

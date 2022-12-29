@@ -2,6 +2,7 @@ import itertools
 
 import numpy as np
 
+from si.data import dataset
 from si.data.dataset import Dataset
 
 

@@ -1,18 +1,21 @@
+from typing import Sequence
+
 import numpy as np
 import pandas as pd
+
+from si.io import csv
 
 
 class Dataset:
 
     def __init__(self, X: np.ndarray, y: np.ndarray, features: list, label: str):
-        #TODO: não está a assumir np.ndarray, tentar resolver
         """
-        Construtor.
+        Construtor do objeto Dataset.
 
-        :param X: Array com valores das features (variáveis independentes) - np.ndarray
-        :param y: Array com bool se a variável dependente é supervisionada ou não (True ou False) (np.udarray?)
+        :param X: Array com os valores das features (variável independente)
+        :param y: Array que indica se existem ou não labels (variável dependente) (se existir (True), o modelo será supervisionado)
         :param features: Lista de strings com o nome das features
-        :param label: String com nome do vetor da variável dependente
+        :param label: String com nome das labels
         """
         self.X = X
         self.y = y
@@ -23,15 +26,15 @@ class Dataset:
         """
         Dá a forma do dataset.
 
-        :return: Tuplo com nº de exemplos e nº de colunas.
+        :return: Tuplo com nº de exemplos/observações e nº de features (colunas).
         """
         return self.X.shape
 
     def has_label(self) -> bool:
         """
-        Verifica se o dataset é supervisionado (tem label (vetor y)) ou não supervisionado (não tem label).
+        Verifica se o dataset é supervisionado (tem labels (vetor y)) ou não supervisionado (não tem labels).
 
-        :return: Booleano: true se tem label; false se não tem label.
+        :return: Booleano: True se tem label; False se não tem label.
         """
         if self.y is not None:
             return True
@@ -39,43 +42,41 @@ class Dataset:
             return False
 
     def get_classes(self) -> list:
-        #TODO: descobrir se devo dar raise de uma exception ou typeerror
-        #TODO: descobrir se é possível dar raise sem parar o programa
         """
-        Classes do dataset.
+        Retorna as classes do dataset.
 
-        :return: Lista com os valores únicos.
+        :return: Lista com os valores únicos do dataset.
         """
         if self.y is None:
-            raise Exception('Dataset não supervisionado (sem label).')
+            raise ValueError('Dataset não supervisionado (sem label).')
         else:
             return np.unique(self.y)
 
-    def get_mean(self) -> list:
+    def get_mean(self) -> np.ndarray:
         """
-        Calcula a média.
+        Calcula a média de cada feature.
 
-        :return: Lista com as médias das features.
+        :return: Array com as médias das features.
         """
-        return np.nanmean(self.X, axis=0)  # axis 0: colunas, axis 1: exemplos
+        return np.nanmean(self.X, axis=0)  # axis 0: features (colunas), axis 1: exemplos/observações (linhas)
 
-    def get_variance(self) -> list:
+    def get_variance(self) -> np.ndarray:
         """
-        Calcula a variância.
+        Calcula a variância de cada feature.
 
-        :return: Lista com as variâncias das features.
+        :return: Array com as variâncias das features.
         """
         return np.nanvar(self.X, axis=0)
 
-    def get_median(self) -> list:
+    def get_median(self) -> np.ndarray:
         """
-        Calcula a mediana.
+        Calcula a mediana de cada feature.
 
-        :return: Lista com as medianas das features.
+        :return: Array com as medianas das features.
         """
         return np.nanmedian(self.X, axis=0)
 
-    def get_min(self) -> list:
+    def get_min(self) -> np.ndarray:
         """
         Calcula o mínimo.
 
@@ -83,9 +84,9 @@ class Dataset:
         """
         return np.nanmin(self.X, axis=0)
 
-    def get_max(self) -> list:
+    def get_max(self) -> np.ndarray:
         """
-        Calcula o máximo.
+        Calcula o máximo de cada feature.
 
         :return: Lista com os valores máximos das features.
         """
@@ -93,9 +94,9 @@ class Dataset:
 
     def summary(self) -> pd.DataFrame:
         """
-        Cria pandas dataframe com média, mediana, variância, mínimo e máximo das features.
+        Cria um dataframe com os valores do summary (média, mediana, variância, mínimo e máximo) das features.
 
-        :return: Pandas dataframe.
+        :return: Pandas dataframe com o summary das features.
         """
         return pd.DataFrame(
             {'mean': self.get_mean(),
@@ -105,43 +106,88 @@ class Dataset:
              'max': self.get_max()}
         )
 
-    def remove_null(self) -> pd.DataFrame:
+    def drop_null(self):
         """
-        Remove os valores nulos.
+        Remove observações que contenham pelo menos um valor nulo (NaN).
+        """
+        # if self.X is not None:
+        #     return pd.DataFrame(self.X).dropna(axis=0)
 
-        :return: Pandas dataframe.
-        """
+        # mask = np.isnan(self.X).any(axis=1) # retorna vetor bool: True se houver nulls na observação
+        # self.X = self.X[~mask] # inverte a mask, ficando só com valores que não são nulls
+
         if self.X is None:
-            return pd.DataFrame(self.X).dropna(axis=0)
+            return
 
-    def replace_null(self, value) -> pd.DataFrame:
+        self.X = self.X[~np.isnan(self.X).any(axis=1)]
+        return Dataset(self.X, self.y, self.features, self.label)
+
+    def replace_null(self, value):
         """
         Substitui os valores nulos.
 
         :param value: Valor que vai substituir o valor nulo.
+        """
+        # if self.X is not None:
+        #     return pd.DataFrame(self.X).fillna(value)
 
-        :return: Pandas dataframe.
+        # self.X = np.nan_to_num(self.X, nan=value)
+        #
+        # # se tiver labels, fazer o update:
+        # if self.has_label():
+        #     self.y = np.nan_to_num(self.y, nan=value)
+
+        if self.X is None:
+            return
+
+        self.X = np.where(pd.isnull(self.X), value, self.X)
+        # return Dataset(self.X, self.y, self.features, self.label)
+        return pd.DataFrame(self.X, columns=self.features, index=self.y)
+
+    def print_dataframe(self) -> pd.DataFrame:
+        """
+        Imprime o dataframe.
+
+        :return: Dataframe
         """
         if self.X is None:
-            return pd.DataFrame(self.X).fillna(value)
-
+            return
+        return pd.DataFrame(self.X, columns=self.features, index=self.y)
 
 if __name__ == '__main__':
-    x = np.array([[1, 2, 3], [1, 2, 3]])
+    x = np.array([[1, 2, 3],
+                  [4, 5, 6]])
     y = np.array([1, 2])
     features = ['A', 'B', 'C']
     label = 'y'
-    dataset = Dataset(X=x, y=y, features=features, label=label)
-    dataset_naosuperv = Dataset(X=x, y=None, features=features, label=label)
-    print(dataset.shape())
-    print(dataset.has_label())
-    print(dataset_naosuperv.has_label())
-    print(dataset.get_classes())
-    print(dataset_naosuperv.get_classes())
-    print(dataset.get_mean())
-    print(dataset.get_variance())
-    print(dataset.get_median())
-    print(dataset.get_min())
-    print(dataset.get_max())
+    dataset = Dataset(X=x, y=y, features=features, label=label) # S
+    dataset_naosuperv = Dataset(X=x, y=None, features=features, label=label) # NS
+    print(f"[S] Shape: {dataset.shape()}")
+    print(f"[S] É supervisionado: {dataset.has_label()}")
+    print(f"[NS] É supervisionado: {dataset_naosuperv.has_label()}")
+    print(f"[S] Classes: {dataset.get_classes()}")
+    # print(dataset.get_mean())
+    # print(dataset.get_variance())
+    # print(dataset.get_median())
+    # print(dataset.get_min())
+    # print(dataset.get_max())
+    print("[S] Summary:")
     print(dataset.summary())
-    #TODO: testes
+
+    # x = np.array([[1, 2, 3],
+    #               [1, None, 3],
+    #               [1, 2, None],
+    #               [None, 2, 3],
+    #               [1, 2, 3]])
+    # y = np.array([1, 2, 4, 4, 5])
+    # features = ["A", "B", "C"]
+    # label = "y"
+    # dataset_null = Dataset(x=x, y=y, features_names=features, label_name=label)
+
+    dataset_iris = r"C:\Users\Ana\Documents\GitHub\mbioinf-sib\datasets\iris_missing_data.csv"
+    test = csv.read_csv(dataset_iris)
+
+    # print("Imprimir dataframe:")
+    # print(dataset_iris.print_dataframe())
+    print("Check NaN:")
+    print(dataset_iris.drop_null())
