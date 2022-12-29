@@ -3,8 +3,6 @@ from typing import Sequence
 import numpy as np
 import pandas as pd
 
-from si.io import csv
-
 
 class Dataset:
 
@@ -116,11 +114,8 @@ class Dataset:
         # mask = np.isnan(self.X).any(axis=1) # retorna vetor bool: True se houver nulls na observação
         # self.X = self.X[~mask] # inverte a mask, ficando só com valores que não são nulls
 
-        if self.X is None:
-            return
-
         self.X = self.X[~np.isnan(self.X).any(axis=1)]
-        return Dataset(self.X, self.y, self.features, self.label)
+        return self.X
 
     def replace_null(self, value):
         """
@@ -128,21 +123,9 @@ class Dataset:
 
         :param value: Valor que vai substituir o valor nulo.
         """
-        # if self.X is not None:
-        #     return pd.DataFrame(self.X).fillna(value)
 
-        # self.X = np.nan_to_num(self.X, nan=value)
-        #
-        # # se tiver labels, fazer o update:
-        # if self.has_label():
-        #     self.y = np.nan_to_num(self.y, nan=value)
-
-        if self.X is None:
-            return
-
-        self.X = np.where(pd.isnull(self.X), value, self.X)
-        # return Dataset(self.X, self.y, self.features, self.label)
-        return pd.DataFrame(self.X, columns=self.features, index=self.y)
+        self.X = np.nan_to_num(self.X, nan=value)
+        return self.X
 
     def print_dataframe(self) -> pd.DataFrame:
         """
@@ -150,8 +133,6 @@ class Dataset:
 
         :return: Dataframe
         """
-        if self.X is None:
-            return
         return pd.DataFrame(self.X, columns=self.features, index=self.y)
 
 if __name__ == '__main__':
@@ -162,32 +143,33 @@ if __name__ == '__main__':
     label = 'y'
     dataset = Dataset(X=x, y=y, features=features, label=label) # S
     dataset_naosuperv = Dataset(X=x, y=None, features=features, label=label) # NS
-    print(f"[S] Shape: {dataset.shape()}")
-    print(f"[S] É supervisionado: {dataset.has_label()}")
-    print(f"[NS] É supervisionado: {dataset_naosuperv.has_label()}")
-    print(f"[S] Classes: {dataset.get_classes()}")
+    print("[S] Shape: ", dataset.shape())
+    print("[S] É supervisionado: ", dataset.has_label())
+    print("[NS] É supervisionado: ", dataset_naosuperv.has_label())
+    print("[S] Classes: ", dataset.get_classes())
     # print(dataset.get_mean())
     # print(dataset.get_variance())
     # print(dataset.get_median())
     # print(dataset.get_min())
     # print(dataset.get_max())
-    print("[S] Summary:")
-    print(dataset.summary())
+    print("[S] Summary:\n", dataset.summary())
 
-    # x = np.array([[1, 2, 3],
-    #               [1, None, 3],
-    #               [1, 2, None],
-    #               [None, 2, 3],
-    #               [1, 2, 3]])
-    # y = np.array([1, 2, 4, 4, 5])
-    # features = ["A", "B", "C"]
-    # label = "y"
-    # dataset_null = Dataset(x=x, y=y, features_names=features, label_name=label)
+    # Removing and replacing NaN:
+    x = np.array([[1, 2, 3],
+                  [1, np.nan, 3],
+                  [1, 2, np.nan],
+                  [np.nan, 2, 3]])
+    y = np.array([1, 2, 4, 4])
+    dataset_null = Dataset(X=x, y=y, features=features, label=label)
 
-    dataset_iris = r"C:\Users\Ana\Documents\GitHub\mbioinf-sib\datasets\iris_missing_data.csv"
-    test = csv.read_csv(dataset_iris)
-
-    # print("Imprimir dataframe:")
-    # print(dataset_iris.print_dataframe())
-    print("Check NaN:")
-    print(dataset_iris.drop_null())
+    print("Imprimir dataset:")
+    print(dataset_null.print_dataframe())
+    # Removing NaN:
+    dataset_null.drop_null()
+    print("Dataset depois de drop_null:")
+    print(dataset_null.X) # print_dataframe not working
+    # Filling NaN:
+    dataset_null = Dataset(X=x, y=y, features=features, label=label)
+    dataset_null.replace_null(10)
+    print("Dataset depois de replace_null:")
+    print(dataset_null.print_dataframe())
