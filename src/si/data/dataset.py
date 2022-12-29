@@ -108,12 +108,6 @@ class Dataset:
         """
         Remove observações que contenham pelo menos um valor nulo (NaN).
         """
-        # if self.X is not None:
-        #     return pd.DataFrame(self.X).dropna(axis=0)
-
-        # mask = np.isnan(self.X).any(axis=1) # retorna vetor bool: True se houver nulls na observação
-        # self.X = self.X[~mask] # inverte a mask, ficando só com valores que não são nulls
-
         self.X = self.X[~np.isnan(self.X).any(axis=1)]
         return self.X
 
@@ -123,7 +117,6 @@ class Dataset:
 
         :param value: Valor que vai substituir o valor nulo.
         """
-
         self.X = np.nan_to_num(self.X, nan=value)
         return self.X
 
