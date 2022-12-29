@@ -54,7 +54,7 @@ def read_csv(filename: str,
         features = None
         label = None
 
-    return Dataset(X, y, features=features, label=label)
+    return Dataset(X, y, features_names=features, label_names=label)
 
 
 def write_csv(filename: str,
@@ -80,9 +80,9 @@ def write_csv(filename: str,
     data = pd.DataFrame(dataset.X)
 
     if features:
-        data.columns = dataset.features
+        data.columns = dataset.features_names
 
     if label:
-        data[dataset.label] = dataset.y
+        data[dataset.label_names] = dataset.y
 
     data.to_csv(filename, sep=sep, index=False)

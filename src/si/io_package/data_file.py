@@ -65,10 +65,3 @@ def write_data_file(filename: str,
         data = dataset.X
 
     return np.savetxt(filename, data, delimiter=sep)
-
-
-if __name__ == '__main__':
-    file = r"C:\Users\Ana\Documents\GitHub\mbioinf-sib\datasets\iris.csv"
-    a = read_data_file(file, label=4)
-    write_data_file(a, "write_data_file1.csv", label=4)
-    pass
