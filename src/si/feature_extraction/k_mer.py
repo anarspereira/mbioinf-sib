@@ -2,8 +2,8 @@ import itertools
 
 import numpy as np
 
-from si.data import dataset
-from si.data.dataset import Dataset
+from si.data import dataset_module
+from si.data.dataset_module import Dataset
 
 
 class KMer:

@@ -1,7 +1,7 @@
 import itertools
 from typing import Dict, Callable, List, Tuple
 
-from si.data.dataset import Dataset
+from si.data.dataset_module import Dataset
 from si.model_selection.cross_validate import cross_validate
 
 

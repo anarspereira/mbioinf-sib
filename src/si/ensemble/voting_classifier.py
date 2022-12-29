@@ -1,6 +1,6 @@
 import numpy as np
 
-from si.data.dataset import Dataset
+from si.data.dataset_module import Dataset
 from si.metrics.accuracy import accuracy
 
 

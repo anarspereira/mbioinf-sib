@@ -1,26 +1,37 @@
-from typing import Sequence
-
+from typing import Tuple, Sequence
 import numpy as np
 import pandas as pd
 
 
 class Dataset:
 
-    def __init__(self, X: np.ndarray, y: np.ndarray, features: list, label: str):
+    def __init__(self, X: np.ndarray, y: np.ndarray = None, features_names: Sequence[str] = None, label_names: str = None):
         """
         Construtor do objeto Dataset.
 
         :param X: Array com os valores das features (variável independente)
         :param y: Array que indica se existem ou não labels (variável dependente) (se existir (True), o modelo será supervisionado)
-        :param features: Lista de strings com o nome das features
-        :param label: String com nome das labels
+        :param features_names: Lista de strings com o nome das features
+        :param label_names: String com nome das labels
         """
+        if X is None:
+            raise ValueError('X cannot be none')
+
+        if features_names is None:
+            features_names_ = [str(i) for i in range(X.shape[1])]
+
+        else:
+            features_names = list(features_names)
+
+        if y is not None and label_names is None:
+            label_names = 'y'
+
         self.X = X
         self.y = y
-        self.features = features
-        self.label = label
+        self.features_names = features_names
+        self.label_names = label_names
 
-    def shape(self) -> tuple:
+    def shape(self) -> Tuple[int, int]:
         """
         Dá a forma do dataset.
 
@@ -126,7 +137,7 @@ class Dataset:
 
         :return: Dataframe
         """
-        return pd.DataFrame(self.X, columns=self.features, index=self.y)
+        return pd.DataFrame(self.X, columns=self.features_names, index=self.y)
 
 if __name__ == '__main__':
     x = np.array([[1, 2, 3],
@@ -134,8 +145,8 @@ if __name__ == '__main__':
     y = np.array([1, 2])
     features = ['A', 'B', 'C']
     label = 'y'
-    dataset = Dataset(X=x, y=y, features=features, label=label) # S
-    dataset_naosuperv = Dataset(X=x, y=None, features=features, label=label) # NS
+    dataset = Dataset(X=x, y=y, features_names=features, label_names=label) # S
+    dataset_naosuperv = Dataset(X=x, y=None, features_names=features, label_names=label) # NS
     print("[S] Shape: ", dataset.shape())
     print("[S] É supervisionado: ", dataset.has_label())
     print("[NS] É supervisionado: ", dataset_naosuperv.has_label())
@@ -153,7 +164,7 @@ if __name__ == '__main__':
                   [1, 2, np.nan],
                   [np.nan, 2, 3]])
     y = np.array([1, 2, 4, 4])
-    dataset_null = Dataset(X=x, y=y, features=features, label=label)
+    dataset_null = Dataset(X=x, y=y, features_names=features, label_names=label)
 
     print("Imprimir dataset:")
     print(dataset_null.print_dataframe())
@@ -162,7 +173,7 @@ if __name__ == '__main__':
     print("Dataset depois de drop_null:")
     print(dataset_null.X) # print_dataframe not working
     # Filling NaN:
-    dataset_null = Dataset(X=x, y=y, features=features, label=label)
+    dataset_null = Dataset(X=x, y=y, features_names=features, label_names=label)
     dataset_null.replace_null(10)
     print("Dataset depois de replace_null:")
     print(dataset_null.print_dataframe())

@@ -2,7 +2,7 @@ from typing import Union
 
 import numpy as np
 
-from si.data.dataset import Dataset
+from si.data.dataset_module import Dataset
 from si.metrics.accuracy import accuracy
 from si.statistics.euclidean_distance import euclidean_distance
 

@@ -1,6 +1,6 @@
 import numpy as np
 
-from si.data.dataset import Dataset
+from si.data.dataset_module import Dataset
 from si.metrics.accuracy import accuracy
 from si.statistics.sigmoid_function import sigmoid_function
 
@@ -134,7 +134,7 @@ class LogisticRegression:
 
     if __name__ == '__main__':
         # import dataset
-        from si.data.dataset import Dataset
+        from si.data.dataset_module import Dataset
         from si.model_selection.split import train_test_split
 
         # load and .......
