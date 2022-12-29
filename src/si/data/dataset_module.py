@@ -139,6 +139,73 @@ class Dataset:
         """
         return pd.DataFrame(self.X, columns=self.features_names, index=self.y)
 
+    @classmethod
+    def from_dataframe(cls, df: pd.DataFrame, label: str = None):
+        """
+        Creates a Dataset object from a pandas DataFrame
+        Parameters
+        ----------
+        df: pandas.DataFrame
+            The DataFrame
+        label: str
+            The label name
+        Returns
+        -------
+        Dataset
+        """
+        if label:
+            X = df.drop(label, axis=1).to_numpy()
+            y = df[label].to_numpy()
+        else:
+            X = df.to_numpy()
+            y = None
+
+        features = df.columns.tolist()
+        return cls(X, y, features_names=features, label_names=label)
+
+    def to_dataframe(self) -> pd.DataFrame:
+        """
+        Converts the dataset to a pandas DataFrame
+        Returns
+        -------
+        pandas.DataFrame
+        """
+        if self.y is None:
+            return pd.DataFrame(self.X, columns=self.features)
+        else:
+            df = pd.DataFrame(self.X, columns=self.features)
+            df[self.label] = self.y
+            return df
+
+    @classmethod
+    def from_random(cls,
+                    n_samples: int,
+                    n_features: int,
+                    n_classes: int = 2,
+                    features: Sequence[str] = None,
+                    label: str = None):
+        """
+        Creates a Dataset object from random data
+        Parameters
+        ----------
+        n_samples: int
+            The number of samples
+        n_features: int
+            The number of features
+        n_classes: int
+            The number of classes
+        features: list of str
+            The feature names
+        label: str
+            The label name
+        Returns
+        -------
+        Dataset
+        """
+        X = np.random.rand(n_samples, n_features)
+        y = np.random.randint(0, n_classes, n_samples)
+        return cls(X, y, features_names=features, label_names=label)
+
 if __name__ == '__main__':
     x = np.array([[1, 2, 3],
                   [4, 5, 6]])
