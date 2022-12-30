@@ -65,7 +65,7 @@ if __name__ == '__main__':
                       y=np.array([0, 1, 0]),
                       features_names=["f1", "f2", "f3", "f4"],
                       label_names="y")
-    select = VarianceThreshold(0) # dar o valor de corte que queremos considerar
-    select = select.fit(dataset)
-    dataset = select.transform(dataset)
+    selector = VarianceThreshold(0) # dar o valor de corte que queremos considerar
+    selector = selector.fit(dataset)
+    dataset = selector.transform(dataset)
     print(dataset.features_names)

@@ -29,11 +29,15 @@ class SelectPercentile:
         Construtor
 
         :param score_func: função de análise da variância (f_classification() ou f_regression())
-        :param percentile: valor do percentile. apenas F-scores acima desse valor permanecem no dataset filtrado
+        :param percentile: valor do percentile. Apenas F-scores acima desse valor permanecem no dataset filtrado
         """
+
+        if percentile > 100 or percentile < 0:
+            raise ValueError("Your percentile must be between 0 and 100")
+
         self.score_func = score_func
-        self.percentile = percentile # se em percentagem temos de depois dividir por 100
-        self.F = None # ainda não os temos
+        self.percentile = percentile  # se em percentagem temos de depois dividir por 100
+        self.F = None  # ainda não os temos
         self.p = None
 
     def fit(self, dataset: Dataset) -> 'SelectPercentile':
@@ -44,7 +48,7 @@ class SelectPercentile:
 
         :return: self
         """
-        self.F, self.p = self.score_func(dataset) # devolve os valores de F e p
+        self.F, self.p = self.score_func(dataset)  # devolve os valores de F e p
         return self
 
     def transform(self, dataset: Dataset) -> Dataset:
@@ -55,25 +59,25 @@ class SelectPercentile:
 
         :return: Dataset, dataset com as features selecionadas
         """
-        features_percentile = int(len(dataset.features_names) * self.percentile / 100)  # calcula o nº de features
-        # selecionadas com F score mais alto até ao valor do percentile indicado (50% de 10 features equivale a 5
-        # features)
+        len_features = len(dataset.features_names)
+        features_percentile = int(len_features * (self.percentile / 100))  # calcula o nº de features selecionadas com F score
+        # mais alto até ao valor do percentile indicado (50% de 10 features equivale a 5 features)
         idxs = np.argsort(self.F)[-features_percentile:]
-        best_features = dataset.X[:, idxs]
-        best_features_names = [dataset.features_names[i] for i in idxs]
-
-        return Dataset(best_features, dataset.y, best_features_names, dataset.label_names)
+        features = np.array(dataset.features_names)[idxs]
+        return Dataset(X=dataset.X[:, idxs], y=dataset.y, features_names=list(features),
+                       label_names=dataset.label_names)
 
     def fit_transform(self, dataset: Dataset) -> Dataset:
         """
         Método que executa o método fit e depois o método transform
 
-        :param dataset: input dataset
+        :param dataset: Dataset
 
-        :return: dataset com as variáveis selecionadas
+        :return: Dataset com as variáveis selecionadas
         """
         self.fit(dataset)
         return self.transform(dataset)
+
 
 if __name__ == '__main__':
     dataset = Dataset(X=np.array([[0, 2, 0, 3],
@@ -83,7 +87,9 @@ if __name__ == '__main__':
                       features_names=["f1", "f2", "f3", "f4"],
                       label_names="y")
     # dataset = read_csv('C:/Users/Ana/Documents/GitHub/mbioinf-sib/datasets/cpu.csv', sep=",", label=True)
-    select = SelectPercentile(f_classification, percentile=25) # chamar o método f_classification p/ o cálculo e introduzir valor de percentile
+    select = SelectPercentile(f_classification,
+                              percentile=25)  # chamar o método f_classification p/ o cálculo e introduzir valor de
+    # percentile (em percentagem)
     select = select.fit(dataset)
     dataset = select.transform(dataset)
     print(dataset)
