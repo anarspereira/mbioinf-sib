@@ -15,27 +15,27 @@ class SelectKBest:
     - f_classification: ANOVA F-value entre label/feature para problemas de classificação.
     - f_regression: F-value obtained from F-value of r's pearson correlation coefficients para problemas de regressão.
 
-    Parameters
+    Parâmetros
     ----------
     score_func: callable
-        Function taking dataset and returning a pair of arrays (scores, p_values).
+        Função que recebe o dataset e retorna um par de arrays (scores, p_values).
     k: int, default=10
-        Number of top features to select.
+        Nº de top features a selecionar.
 
-    Attributes
+    Atributos
     ----------
     F: array, shape (n_features,)
-        F scores of features
+        F scores das features
     p: array, shape (n_features,)
-        p-values of F-scores
+        p-values dos F-scores
     """
 
     def __init__(self, score_func: Callable = f_classification, k: int = 10):
         """
         Construtor
 
-        :param score_func: função de análise da variância (recebe o dataset e retorna um par de arrays (scores, p-values)
-        :param k: número de features a selecionar (default: 10)
+        :param score_func: Função de análise da variância (recebe o dataset e retorna um par de arrays (scores, p-values)
+        :param k: Número de features a selecionar (default: 10)
         """
         self.score_func = score_func
         self.k = k
@@ -75,7 +75,7 @@ class SelectKBest:
         :return: Dataset com as k-highest scoring features.
         """
         self.fit(dataset)
-        return self.transform(dataset)
+        return self.transform(dataset=dataset)
 
 if __name__ == '__main__':
     dataset = Dataset(X = np.array([[0, 2, 0, 3],
