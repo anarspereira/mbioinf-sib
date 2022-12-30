@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Union, Callable
 
 import numpy as np
 
@@ -8,27 +8,46 @@ from si.statistics.euclidean_distance import euclidean_distance
 
 
 class KNNClassifier:
-
-    def __init__(self, k, distance, dataset):
+    """
+    KNN Classifier
+    The k-Nearst Neighbors classifier is a machine learning model that classifies new samples based on
+    a similarity measure (e.g., distance functions). This algorithm predicts the classes of new samples by
+    looking at the classes of the k-nearest samples in the training data.
+    Parameters
+    ----------
+    k: int
+        The number of nearest neighbors to use
+    distance: Callable
+        The distance function to use
+    Attributes
+    ----------
+    dataset: np.ndarray
+        The training data
+    """
+    def __init__(self, k: int = 1, distance: Callable = euclidean_distance):
         """
         Construtor da class KNNClassifier.
 
-        :param k: Número de k exemplos a considerar.
+        :param k: Número de k exemplos de nearest neighbors a considerar.
         :param distance: Função que calcula a distância entre a amostra e as amostras do dataset de treino
         """
+        # Parâmetros
         self.k = k
         self.distance = euclidean_distance # euclidean distance
-        self.dataset = dataset
 
-    def fit(self, dataset: Dataset) -> Dataset:
+        # Atributos
+        self.dataset = None
+
+    def fit(self, dataset: Dataset) -> 'KNNClassifier':
         """
-        Método para armazenar o dataset de treino.
+        Método para fazer o fit do modelo de acordo com o input dataset.
 
         :param dataset: Dataset de treino.
 
-        :return: O próprio dataset.
+        :return: self. O modelo treinado
         """
         self.dataset = dataset
+        return self
 
     def _get_closest_label(self, sample: np.ndarray) -> Union[int, str]:
         """
@@ -36,7 +55,7 @@ class KNNClassifier:
 
         :param sample: Array com a sample.
 
-        :return: String ou inteiro com a label mais próxima..
+        :return: String ou inteiro com a label mais próxima.
         """
         # passo 1 - calcular distância usando a distância euclideana - compute the distance between the sample and the dataset
         distances = self.distance(sample, self.dataset.X)
@@ -48,8 +67,9 @@ class KNNClassifier:
         k_nearest_neighbors_labels = self.dataset.y[k_nearest_neighbors]
 
         # passo 4 - get the most common label
-        # obter classe mais comum nos k exemplos através do np.unique, que retornará um array que diz as contagens de cada um dos valores do y_prep e outro array com os valores únicos que estão ali
-        # depois, para selecionar o mais comum, selecionar o maior através de np.argmax
+        # obter classe mais comum nos k exemplos através do np.unique, que retornará um array que diz as contagens de
+        # cada um dos valores do y_prep e outro array com os valores únicos que estão ali depois, para selecionar o mais
+        # comum, selecionar o maior através de np.argmax
         labels, counts = np.unique(k_nearest_neighbors_labels, return_counts=True)
         # array das labels - binário
         # array counts - contagem de labels
@@ -69,9 +89,29 @@ class KNNClassifier:
         """
         Método com a função accuracy, que retorna a accuracy do modelo e o dado dataset.
 
-        :param dataset: Dataset de teste (y_true) (y são as labels).
+        :param dataset: Dataset de teste (y_true) (y são as labels) onde avaliar o modelo.
 
         :return: Valor de accuracy do modelo.
         """
         predictions = self.predict(dataset)
         return accuracy(dataset.y, predictions)
+
+
+if __name__ == '__main__':
+    # import dataset
+    from si.data.dataset_module import Dataset
+    from si.model_selection.split import train_test_split
+
+    # load and split the dataset
+    dataset_ = Dataset.from_random(600, 100, 2)
+    dataset_train, dataset_test = train_test_split(dataset=dataset_, test_size=0.2)
+
+    # initialize the KNN classifier
+    knn = KNNClassifier(k=3)
+
+    # fit the model to the train dataset
+    knn.fit(dataset_train)
+
+    # evaluate the model on the test dataset
+    score = knn.score(dataset_test)
+    print(f'The accuracy of the model is: {score}')
