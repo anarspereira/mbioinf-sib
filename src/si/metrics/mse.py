@@ -3,18 +3,14 @@ import numpy as np
 
 def mse(y_true: np.ndarray, y_pred: np.ndarray) -> float:
     """
-    It returns the mean squared error of the model on the given dataset
+    Retorna o Mean Squared Error do modelo num dado dataset.
 
-    Parameters
-    ----------
-    y_true: np.ndarray
-        The true labels of the dataset
-    y_pred: np.ndarray
-        The predicted labels of the dataset
+    :param y_true: np.ndarray
+        Labels reais do dataset
+    :param y_pred: np.ndarray
+        Labels estimadas do dataset
 
-    Returns
-    -------
-    mse: float
-        The mean squared error of the model
+    :return: mse: float
+        O Mean Squared Error do modelo entre y_true e y_pred
     """
     return np.sum((y_true - y_pred) ** 2) / (len(y_true) * 2)

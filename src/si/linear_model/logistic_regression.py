@@ -1,4 +1,5 @@
 import numpy as np
+from matplotlib import pyplot as plt
 
 from si.data.dataset_module import Dataset
 from si.metrics.accuracy import accuracy
@@ -6,40 +7,58 @@ from si.statistics.sigmoid_function import sigmoid_function
 
 
 class LogisticRegression:
+    """
+    The LogisticRegression is a linear model using the L2 regularization and the sigmoid function.
+    This model uses the linear regression problem using an adapter Gradient Descent technique.
+
+    Parameters
+    ----------
+    l2_penalty: float
+        Coeficiente da regularização L2
+    alpha: float
+        Taxa de aprendizagem (learning rate)
+    max_iter: int
+        Número máximo de iterações
+
+    Attributes
+    ----------
+    theta: np.array
+        Coeficientes/parâmetros do modelo linear para as variáveis de entrada (features)
+        Por exemplo, x0 * theta[0] + x1 * theta[1] + ...
+    theta_zero: float
+        Coeficiente/parâmetro 0, conhecido por interceção do modelo linear.
+        Por exemplo, theta_zero * 1
+    """
 
     def __init__(self, l2_penalty: float = 1, alpha: float = 0.001, max_iter: int = 1000):
         """
+        Construtor do LogisticRegression
 
-        Parameters
-        ----------
-        l2_penalty: float
+        :param l2_penalty: float
             The L2 regularization parameter
-        alpha: float
+        :param alpha: float
             The learning rate
-        max_iter: int
+        :param max_iter: int
             The maximum number of iterations
         """
-        # parameters
+        # parâmetros
         self.l2_penalty = l2_penalty
         self.alpha = alpha
         self.max_iter = max_iter
 
-        # attributes
+        # atributos
         self.theta = None
         self.theta_zero = None
+        self.cost_history = {}
 
     def fit(self, dataset: Dataset) -> 'LogisticRegression':
         """
-        Fit the model to the dataset
+        Faz o fit do modelo
 
-        Parameters
-        ----------
-        dataset: Dataset
+        :param dataset: Dataset
             The dataset to fit the model to
 
-        Returns
-        -------
-        self: LogisticRegression
+        :return: self: LogisticRegression
             The fitted model
         """
         m, n = dataset.shape()
@@ -48,48 +67,57 @@ class LogisticRegression:
         self.theta = np.zeros(n) # o tamanho é o número de features (temos um theta para cada uma das features)
         self.theta_zero = 0
 
+        # threshold to stop gradient descent when cost function value stabilizes
+        threshold = 0.0001
+
         # gradient descent
         for i in range(self.max_iter):
-            # predicted y
-            y_pred = np.dot(dataset.X, self.theta) + self.theta_zero
+            # computing cost and updating cost_history
+            self.cost_history[i] = self.cost(dataset=dataset)
 
-            # apply sigmoid function
-            y_pred = sigmoid_function(y_pred)
+            if i > 1 and (self.cost_history[i - 1] - self.cost_history[i] < threshold):
+                break
+            else:
+                # predicted y
+                y_pred = sigmoid_function(np.dot(dataset.X, self.theta) + self.theta_zero)
 
-            # computing and updating the gradient with the learning rate
-            gradient = (self.alpha * (1 / m)) * np.dot(y_pred - dataset.y, dataset.X)
+                # computing and updating the gradient of the cost function with the learning rate
+                gradient = (self.alpha * (1 / m)) * np.dot(y_pred - dataset.y, dataset.X)  # np.dot soma os valores das
+                # colunas dos arrays de multiplicação
+                # o learning rate é multiplicado por 1/m para normalizar o learning rate ao tamanho do dataset
 
-            # computing the penalty
-            penalization_term = self.alpha * (self.l2_penalty / m) * self.theta
+                # computing the l2 penalty
+                penalization_term = self.alpha * (self.l2_penalty / m) * self.theta
 
-            # updating the model parameters
-            self.theta = self.theta - gradient - penalization_term
-            self.theta_zero = self.theta_zero - (self.alpha * (1 / m)) * np.sum(y_pred - dataset.y)
+                # updating the model parameters
+                self.theta = self.theta - gradient - penalization_term
+                self.theta_zero = self.theta_zero - (self.alpha * (1 / m)) * np.sum(y_pred - dataset.y)
 
         return self
 
     def predict(self, dataset: Dataset) -> np.array:
         """
-        Predict the output of the dataset
+        Faz a previsão do output do dataset
 
-        Parameters
-        ----------
-        dataset: Dataset
+        :param dataset: Dataset
             The dataset to predict the output of
 
-        Returns
-        -------
-        predictions: np.array
+        :return: predictions: np.array
             The predictions of the dataset
         """
         # apply, lista de compreensão ou usando uma mask
-        predictions = sigmoid_function(np.dot(dataset.X, self.theta) + self.theta_zero)
+        y_pred = sigmoid_function(np.dot(dataset.X, self.theta) + self.theta_zero)
 
-        # convert the predictions to 0 or 1 (binarization)
-        mask = predictions >= 0.5 # porque é o meio da função sigmoid (função que estima a probabilidade de um valor estar entre 0 e 1)
-        predictions[mask] = 1
-        predictions[~mask] = 0
-        return predictions
+        # # como fizemos na aula:
+        # # convert the predictions to 0 or 1 (binarization)
+        # mask = y_pred >= 0.5 # porque é o meio da função sigmoid (função que estima a probabilidade de um valor
+        # # estar entre 0 e 1)
+        # y_pred[mask] = 1
+        # y_pred[~mask] = 0
+
+        y_pred = [1 if x >= 0.5 else 0 for x in y_pred]
+
+        return y_pred
 
     def score(self, dataset: Dataset) -> float:
         """
@@ -105,7 +133,6 @@ class LogisticRegression:
         mse: float
             The Mean Square Error of the model
         """
-        # usa-se a accuracy por este modelo ser especificamente usado para classificação
         y_pred = self.predict(dataset)
         return accuracy(dataset.y, y_pred)
 
@@ -128,13 +155,36 @@ class LogisticRegression:
         predictions = sigmoid_function(np.dot(dataset.X, self.theta)+ self.theta_zero)
         cost = (-dataset.y * np.log(predictions)) - ((1 - dataset.y) * np.log(1 - predictions))
         cost = np.sum(cost) / dataset.shape()[0]
-        cost = cost + (self.l2_penalty * np.sum(self.theta ** 2) / (2 * dataset.shape()[0])) # + porque, na fórmula, multiplicamos por -1/m
+        cost = cost + (self.l2_penalty * np.sum(self.theta ** 2) / (2 * dataset.shape()[0])) # + porque, na fórmula,
+        # multiplicamos por -1/m
         return cost
 
+    def plot_cost_history(self):
+        """
+        Faz o plot do cost history em função do nº de iterações.
+        """
+        plt.plot(self.cost_history.keys(), self.cost_history.values())
+        plt.xlabel("Iteration")
+        plt.ylabel("Cost")
+        plt.show()
 
-    if __name__ == '__main__':
-        # import dataset
-        from si.data.dataset_module import Dataset
-        from si.model_selection.split import train_test_split
+if __name__ == '__main__':
+    # import dataset
+    from si.data.dataset_module import Dataset
+    from si.model_selection.split import train_test_split
 
-        # load and .......
+    # load and split the dataset
+    dataset_ = Dataset.from_random(600, 100, 2)
+    dataset_train, dataset_test = train_test_split(dataset_, test_size=0.2)
+
+    # fit the model
+    model = LogisticRegression(l2_penalty=1, alpha=0.001, max_iter=1000)
+    model.fit(dataset_train)
+
+    # compute the score
+    score = model.score(dataset_test)
+    print(f"Score: {score}")
+
+    # compute the cost
+    cost = model.cost(dataset_)
+    print(f"Cost: {cost}")

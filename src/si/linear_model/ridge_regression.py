@@ -1,4 +1,5 @@
 import numpy as np
+from matplotlib import pyplot as plt
 
 from si.data.dataset_module import Dataset
 from si.metrics.mse import mse
@@ -7,59 +8,56 @@ from si.metrics.mse import mse
 class RidgeRegression:
     """
     The RidgeRegression is a linear model using the L2 regularization.
-    This model solves the linear regression problem using an adapted Gradient Descent technique
+    This model solves the linear regression problem using an adapted Gradient Descent technique.
 
     Parameters
     ----------
     l2_penalty: float
-        The L2 regularization parameter
+        Coeficiente da regularização L2
     alpha: float
-        The learning rate
+        Taxa de aprendizagem (learning rate)
     max_iter: int
-        The maximum number of iterations
+        Número máximo de iterações
 
     Attributes
     ----------
     theta: np.array
-        The model parameters, namely the coefficients of the linear model.
-        For example, x0 * theta[0] + x1 * theta[1] + ...
+        Coeficientes/parâmetros do modelo linear para as variáveis de entrada (features)
+        Por exemplo, x0 * theta[0] + x1 * theta[1] + ...
     theta_zero: float
-        The model parameter, namely the intercept of the linear model.
-        For example, theta_zero * 1
+        Coeficiente/parâmetro 0, conhecido por interceção do modelo linear.
+        Por exemplo, theta_zero * 1
     """
+
     def __init__(self, l2_penalty: float = 1, alpha: float = 0.001, max_iter: int = 1000):
         """
+        Construtor do RidgeRegression
 
-        Parameters
-        ----------
-        l2_penalty: float
-            The L2 regularization parameter
-        alpha: float
-            The learning rate
-        max_iter: int
-            The maximum number of iterations
+        :param l2_penalty: float
+            Coeficiente da regularização L2
+        :param alpha: float
+            The learning rate - permite ao algoritmo não cometer um erro muito grave, que é saltar o mínimo global
+        :param max_iter: int
+            Número máximo de iterações
         """
-        # parameters
+        # parâmetros
         self.l2_penalty = l2_penalty
         self.alpha = alpha
         self.max_iter = max_iter
 
-        # attributes
+        # atributos
         self.theta = None
         self.theta_zero = None
+        self.cost_history = {}
 
     def fit(self, dataset: Dataset) -> 'RidgeRegression':
         """
-        Fit the model to the dataset
+        Faz o fit do modelo
 
-        Parameters
-        ----------
-        dataset: Dataset
+        :param dataset: Dataset
             The dataset to fit the model to
 
-        Returns
-        -------
-        self: RidgeRegression
+        :return: self: RidgeRegression
             The fitted model
         """
         m, n = dataset.shape()
@@ -68,51 +66,54 @@ class RidgeRegression:
         self.theta = np.zeros(n) # o tamanho é o número de features (temos um theta para cada uma das features)
         self.theta_zero = 0
 
+        # threshold to stop gradient descent when cost function value stabilizes
+        threshold = 1
+
         # gradient descent
         for i in range(self.max_iter):
-            # predicted y
-            y_pred = np.dot(dataset.X, self.theta) + self.theta_zero
+            # computing cost and updating cost_history
+            self.cost_history[i] = self.cost(dataset=dataset)
 
-            # computing and updating the gradient with the learning rate
-            gradient = (self.alpha * (1 / m)) * np.dot(y_pred - dataset.y, dataset.X)
+            if i > 1 and (self.cost_history[i-1] - self.cost_history[i] < threshold):
+                break
+            else:
+                # predicted y
+                y_pred = np.dot(dataset.X, self.theta) + self.theta_zero # y=mx+b
 
-            # computing the penalty
-            penalization_term = self.alpha * (self.l2_penalty / m) * self.theta
+                # computing and updating the gradient of the cost function with the learning rate
+                gradient = (self.alpha * (1 / m)) * np.dot(y_pred - dataset.y, dataset.X) # np.dot soma os valores das
+                # colunas dos arrays de multiplicação
+                # o learning rate é multiplicado por 1/m para normalizar o learning rate ao tamanho do dataset
 
-            # updating the model parameters
-            self.theta = self.theta - gradient - penalization_term
-            self.theta_zero = self.theta_zero - (self.alpha * (1 / m)) * np.sum(y_pred - dataset.y)
+                # computing the l2 penalty
+                penalization_term = self.alpha * (self.l2_penalty / m) * self.theta
+
+                # updating the model parameters
+                self.theta = self.theta - gradient - penalization_term
+                self.theta_zero = self.theta_zero - (self.alpha * (1 / m)) * np.sum(y_pred - dataset.y)
 
         return self
 
     def predict(self, dataset: Dataset) -> np.array:
         """
-        Predict the output of the dataset
+        Faz a previsão do output do dataset
 
-        Parameters
-        ----------
-        dataset: Dataset
+        :param dataset: Dataset
             The dataset to predict the output of
 
-        Returns
-        -------
-        predictions: np.array
+        :return: predictions: np.array
             The predictions of the dataset
         """
         return np.dot(dataset.X, self.theta) + self.theta_zero
 
     def score(self, dataset: Dataset) -> float:
         """
-        Compute the Mean Square Error of the model on the dataset
+        Calcula o Mean Square Error do modelo no dataset
 
-        Parameters
-        ----------
-        dataset: Dataset
+        :param dataset: Dataset
             The dataset to compute the MSE on
 
-        Returns
-        -------
-        mse: float
+        :return: mse: float
             The Mean Square Error of the model
         """
         y_pred = self.predict(dataset)
@@ -120,20 +121,25 @@ class RidgeRegression:
 
     def cost(self, dataset: Dataset) -> float:
         """
-        Compute the cost function (J function) of the model on the dataset using L2 regularization
+        Calcula a cost function (J function) do modelo no dataset, usando a L2 regularization
 
-        Parameters
-        ----------
-        dataset: Dataset
+        :param dataset: Dataset
             The dataset to compute the cost function on
 
-        Returns
-        -------
-        cost: float
+        :return: cost: float
             The cost function of the model
         """
         y_pred = self.predict(dataset)
         return (np.sum((y_pred - dataset.y) ** 2) + (self.l2_penalty * np.sum(self.theta ** 2))) / (2 * len(dataset.y))
+
+    def plot_cost_history(self):
+        """
+        Faz o plot do cost history em função do nº de iterações.
+        """
+        plt.plot(self.cost_history.keys(), self.cost_history.values(), "-k")
+        plt.xlabel("Iteration")
+        plt.ylabel("Cost")
+        plt.show()
 
 
 if __name__ == '__main__':
