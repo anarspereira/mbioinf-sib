@@ -13,12 +13,14 @@ class KNNClassifier:
     The k-Nearst Neighbors classifier is a machine learning model that classifies new samples based on
     a similarity measure (e.g., distance functions). This algorithm predicts the classes of new samples by
     looking at the classes of the k-nearest samples in the training data.
+
     Parameters
     ----------
     k: int
         The number of nearest neighbors to use
     distance: Callable
         The distance function to use
+
     Attributes
     ----------
     dataset: np.ndarray

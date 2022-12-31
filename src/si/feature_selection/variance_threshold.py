@@ -1,10 +1,11 @@
 import numpy as np
 from si.data.dataset_module import Dataset
 
+
 class VarianceThreshold:
     """
     Classe que integra os métodos de análise e remoção dos features com um valor de variância abaixo do
-    valor de threshold
+    valor de threshold.
     """
 
     def __init__(self, threshold: float):
