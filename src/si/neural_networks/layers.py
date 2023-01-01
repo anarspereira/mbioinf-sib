@@ -166,7 +166,11 @@ class ReLUActivation:
         :param learning_rate: float, optional
             Taxa de aprendizagem.
         """
-        pass
+        relu_deriv = np.where(self.input_data > 0, 1, 0)
+
+        error_to_propagate = error * relu_deriv
+
+        return error_to_propagate
 
 
 class LinearActivation:
