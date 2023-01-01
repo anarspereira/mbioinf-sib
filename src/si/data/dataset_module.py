@@ -171,10 +171,10 @@ class Dataset:
         pandas.DataFrame
         """
         if self.y is None:
-            return pd.DataFrame(self.X, columns=self.features)
+            return pd.DataFrame(self.X, columns=self.features_names)
         else:
-            df = pd.DataFrame(self.X, columns=self.features)
-            df[self.label] = self.y
+            df = pd.DataFrame(self.X, columns=self.features_names)
+            df[self.label_names] = self.y
             return df
 
     @classmethod
