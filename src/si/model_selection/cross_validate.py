@@ -6,7 +6,11 @@ from si.data.dataset_module import Dataset
 from si.model_selection.split import train_test_split
 
 
-def cross_validate (model, dataset: Dataset, scoring: Callable = None, cv: int = 3, test_size: float = 0.2) -> Dict[str, List[float]]:
+def cross_validate(model,
+                   dataset: Dataset,
+                   scoring: Callable = None,
+                   cv: int = 3,
+                   test_size: float = 0.2) -> Dict[str, List[float]]:
     """
     Método para fazer a cross validation dos dataset de treino e teste.
 
@@ -50,7 +54,7 @@ def cross_validate (model, dataset: Dataset, scoring: Callable = None, cv: int =
             scores['test'].append(model.score(test))
 
         else:
-            # vamos fazer o nosso próprio score - ctrl+C, ctrl+V do score do logistic regression ou knn
+            # vamos fazer o nosso próprio score - igual ao score do logistic regression ou knn
             y_train = train.y
             y_test = test.y
 
@@ -61,6 +65,25 @@ def cross_validate (model, dataset: Dataset, scoring: Callable = None, cv: int =
             scores['test'].append(scoring(y_test, model.predict(test)))
 
     return scores
+
+
+if __name__ == '__main__':
+    # import dataset
+    from si.data.dataset_module import Dataset
+    from si.neighbors.knn_classifier import KNNClassifier
+
+    # load and split the dataset
+    dataset_ = Dataset.from_random(600, 100, 2)
+
+    # initialize the KNN
+    knn = KNNClassifier(k=3)
+
+    # cross validate the model
+    scores_ = cross_validate(knn, dataset_, cv=5)
+
+    # print the scores
+    print(scores_)
+
 
 # o output vai ser algo do género:
 # seeds: [10, 9, 7]
