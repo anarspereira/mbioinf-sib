@@ -152,7 +152,7 @@ if __name__ == '__main__':
     dataset_ = Dataset(X=X, y=y)
 
     # fit the model
-    model = RidgeRegression()
+    model = RidgeRegression(l2_penalty=1, alpha=0.001, max_iter=1000)
     model.fit(dataset_)
 
     # get coefs

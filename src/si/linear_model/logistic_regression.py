@@ -121,16 +121,12 @@ class LogisticRegression:
 
     def score(self, dataset: Dataset) -> float:
         """
-        Compute the Mean Square Error of the model on the dataset
+        Calcula o Mean Square Error do modelo no dataset
 
-        Parameters
-        ----------
-        dataset: Dataset
+        :param dataset: Dataset
             The dataset to compute the MSE on
 
-        Returns
-        -------
-        mse: float
+        :return: mse: float
             The Mean Square Error of the model
         """
         y_pred = self.predict(dataset)
@@ -138,16 +134,12 @@ class LogisticRegression:
 
     def cost(self, dataset: Dataset) -> float:
         """
-        Compute the cost function (J function) of the model on the dataset using L2 regularization
+        Calcula a cost function (J function) do modelo no dataset, usando a L2 regularization
 
-        Parameters
-        ----------
-        dataset: Dataset
+        :param dataset: Dataset
             The dataset to compute the cost function on
 
-        Returns
-        -------
-        cost: float
+        :return: cost: float
             The cost function of the model
         """
         # o predict do logístico faz o binário e é só para ajustar para classificação.
