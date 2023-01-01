@@ -65,18 +65,16 @@ class NN:
         self.verbose = verbose
 
         # attributes
-        self.history = {}
+        self.history = {} # records the model training history
 
     def fit(self, dataset: Dataset) -> 'NN':
         """
         It fits the model to the given dataset.
-        Parameters
-        ----------
-        dataset: Dataset
+
+        :param dataset: Dataset
             The dataset to fit the model to
-        Returns
-        -------
-        self: NN
+
+        :return: self: NN
             The fitted model
         """
         X = dataset.X
@@ -106,13 +104,11 @@ class NN:
     def predict(self, dataset: Dataset) -> np.ndarray:
         """
         It predicts the output of the given dataset.
-        Parameters
-        ----------
-        dataset: Dataset
+
+        :param dataset: Dataset
             The dataset to predict the output of
-        Returns
-        -------
-        predictions: np.ndarray
+
+        :return: predictions: np.ndarray
             The predicted output
         """
         X = dataset.X
@@ -126,13 +122,11 @@ class NN:
     def cost(self, dataset: Dataset) -> float:
         """
         It computes the cost of the model on the given dataset.
-        Parameters
-        ----------
-        dataset: Dataset
+
+        :param dataset: Dataset
             The dataset to compute the cost on
-        Returns
-        -------
-        cost: float
+
+        :return: cost: float
             The cost of the model
         """
         y_pred = self.predict(dataset)
@@ -141,20 +135,14 @@ class NN:
     def score(self, dataset: Dataset, scoring_func: Callable = accuracy) -> float:
         """
         It computes the score of the model on the given dataset.
-        Parameters
-        ----------
-        dataset: Dataset
+
+        :param dataset: Dataset
             The dataset to compute the score on
-        scoring_func: Callable
+        :param scoring_func: Callable
             The scoring function to use
-        Returns
-        -------
-        score: float
+
+        :return: score: float
             The score of the model
         """
         y_pred = self.predict(dataset)
         return scoring_func(dataset.y, y_pred)
-
-
-if __name__ == '__main__':
-    pass
